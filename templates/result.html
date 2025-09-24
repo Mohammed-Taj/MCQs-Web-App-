@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6 col-md-8">
+        <div class="card text-center shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h4>نتيجة الاختبار</h4>
+            </div>
+            <div class="card-body py-5">
+                <div class="display-1 fw-bold text-success">{{ score }}/{{ total }}</div>
+                <h5 class="mt-3">{{ quiz.title }}</h5>
+                <p class="text-muted">الطالب: {{ student.username }}</p>
+
+                {# Safely calculate percentage #}
+                {% if total and total > 0 %}
+                {% set percentage = ((score / total) * 100) | round %}
+                {% else %}
+                {% set percentage = 0 %}
+                {% endif %}
+
+                {# Determine progress bar class #}
+                {% if percentage >= 70 %}
+                {% set progress_class = "progress-success" %}
+                {% elif percentage >= 50 %}
+                {% set progress_class = "progress-warning" %}
+                {% else %}
+                {% set progress_class = "progress-danger" %}
+                {% endif %}
+
+                <div class="progress mt-4 mb-3">
+                    <div class="progress-bar {{ progress_class }}" style="width: {{ percentage|default(0) }}%;">
+                        {{ percentage|default(0) }}%
+                    </div>
+
+                </div>
+
+                {# Optional Pass/Fail message #}
+                <h5 class="mt-3">
+                    {% if percentage >= 70 %}
+                    <span class="text-success">نجاح ✅</span>
+                    {% elif percentage >= 50 %}
+                    <span class="text-warning">مقبول ⚠️</span>
+                    {% else %}
+                    <span class="text-danger">راسب ❌</span>
+                    {% endif %}
+                </h5>
+
+                <div class="mt-4 d-flex justify-content-center gap-2 flex-wrap">
+                    <a href="{{ url_for('index') }}" class="btn btn-primary">العودة للرئيسية</a>
+                    <a href="{{ url_for('results') }}" class="btn btn-outline-primary">عرض جميع النتائج</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

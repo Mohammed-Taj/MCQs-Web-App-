@@ -1,0 +1,328 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header py-4"
+                style="background: linear-gradient(to right, var(--primary), var(--secondary));">
+                <div class="d-flex align-items-center">
+                    <div class="icon-circle bg-white me-3">
+                        <i class="fas fa-edit text-primary"></i>
+                    </div>
+                    <div>
+                        <h4 class="m-0 font-weight-bold text-white">Edit Question</h4>
+                        <p class="m-0 text-white-50">Update your question details</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-5">
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show d-flex align-items-center mb-4"
+                    role="alert">
+                    <i class="fas {{ 'fa-exclamation-circle' if category == 'error' else 'fa-check-circle' }} me-2"></i>
+                    <div>{{ message }}</div>
+                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+
+                <form method="POST" id="questionForm">
+                    <div class="mb-4">
+                        <label for="text" class="form-label fw-bold text-dark mb-2">Question Text</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 align-items-start pt-2">
+                                <i class="fas fa-question text-primary"></i>
+                            </span>
+                            <textarea class="form-control ps-3 border-start-0" id="text" name="text" rows="3"
+                                placeholder="Enter your question here" required>{{ question.text }}</textarea>
+                        </div>
+                        <div class="form-text">Make your question clear and concise</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="fw-bold text-dark mb-3">Answer Choices</h5>
+
+                        <div class="answer-option mb-3">
+                            <div class="d-flex align-items-center mb-1">
+                                <span class="badge bg-primary me-2">A</span>
+                                <label for="choice_a" class="form-label fw-semibold text-dark mb-0">Choice A</label>
+                                {% if question.correct == 'A' %}
+                                <span class="badge bg-success ms-2"><i class="fas fa-check me-1"></i>Correct</span>
+                                {% endif %}
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="fas fa-circle text-primary"></i>
+                                </span>
+                                <input type="text" class="form-control ps-3 border-start-0" id="choice_a"
+                                    name="choice_a" value="{{ question.choice_a }}" placeholder="Enter option A"
+                                    required>
+                            </div>
+                        </div>
+
+                        <div class="answer-option mb-3">
+                            <div class="d-flex align-items-center mb-1">
+                                <span class="badge bg-primary me-2">B</span>
+                                <label for="choice_b" class="form-label fw-semibold text-dark mb-0">Choice B</label>
+                                {% if question.correct == 'B' %}
+                                <span class="badge bg-success ms-2"><i class="fas fa-check me-1"></i>Correct</span>
+                                {% endif %}
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="fas fa-circle text-primary"></i>
+                                </span>
+                                <input type="text" class="form-control ps-3 border-start-0" id="choice_b"
+                                    name="choice_b" value="{{ question.choice_b }}" placeholder="Enter option B"
+                                    required>
+                            </div>
+                        </div>
+
+                        <div class="answer-option mb-3">
+                            <div class="d-flex align-items-center mb-1">
+                                <span class="badge bg-primary me-2">C</span>
+                                <label for="choice_c" class="form-label fw-semibold text-dark mb-0">Choice C</label>
+                                {% if question.correct == 'C' %}
+                                <span class="badge bg-success ms-2"><i class="fas fa-check me-1"></i>Correct</span>
+                                {% endif %}
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="fas fa-circle text-primary"></i>
+                                </span>
+                                <input type="text" class="form-control ps-3 border-start-0" id="choice_c"
+                                    name="choice_c" value="{{ question.choice_c }}" placeholder="Enter option C"
+                                    required>
+                            </div>
+                        </div>
+
+                        <div class="answer-option mb-4">
+                            <div class="d-flex align-items-center mb-1">
+                                <span class="badge bg-primary me-2">D</span>
+                                <label for="choice_d" class="form-label fw-semibold text-dark mb-0">Choice D</label>
+                                {% if question.correct == 'D' %}
+                                <span class="badge bg-success ms-2"><i class="fas fa-check me-1"></i>Correct</span>
+                                {% endif %}
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="fas fa-circle text-primary"></i>
+                                </span>
+                                <input type="text" class="form-control ps-3 border-start-0" id="choice_d"
+                                    name="choice_d" value="{{ question.choice_d }}" placeholder="Enter option D"
+                                    required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="correct" class="form-label fw-bold text-dark mb-2">Correct Answer</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0">
+                                <i class="fas fa-check-circle text-success"></i>
+                            </span>
+                            <select class="form-select ps-3 border-start-0" id="correct" name="correct" required>
+                                <option value="A" {% if question.correct=='A' %}selected{% endif %}>Option A</option>
+                                <option value="B" {% if question.correct=='B' %}selected{% endif %}>Option B</option>
+                                <option value="C" {% if question.correct=='C' %}selected{% endif %}>Option C</option>
+                                <option value="D" {% if question.correct=='D' %}selected{% endif %}>Option D</option>
+                            </select>
+                        </div>
+                        <div class="form-text">Select which option is the correct answer</div>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary px-4 py-2 fw-bold">
+                            <i class="fas fa-save me-2"></i>Update Question
+                        </button>
+                        <a href="{{ url_for('update_quiz_route', quiz_id=question.quiz_id) }}"
+                            class="btn btn-outline-secondary px-4 py-2">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                        <button type="button" class="btn btn-outline-info px-4 py-2 ms-auto" id="previewBtn">
+                            <i class="fas fa-eye me-2"></i>Preview
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Preview Modal -->
+        <div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold text-dark">Question Preview</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <h6 class="fw-bold text-dark mb-3" id="previewQuestion">{{ question.text }}</h6>
+
+                        <div class="list-group">
+                            <div class="list-group-item">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="previewAnswer" id="previewA"
+                                        value="A" {% if question.correct=='A' %}checked{% endif %} disabled>
+                                    <label class="form-check-label w-100" for="previewA">
+                                        <span class="badge bg-primary me-2">A</span>
+                                        <span id="previewChoiceA">{{ question.choice_a }}</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="list-group-item">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="previewAnswer" id="previewB"
+                                        value="B" {% if question.correct=='B' %}checked{% endif %} disabled>
+                                    <label class="form-check-label w-100" for="previewB">
+                                        <span class="badge bg-primary me-2">B</span>
+                                        <span id="previewChoiceB">{{ question.choice_b }}</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="list-group-item">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="previewAnswer" id="previewC"
+                                        value="C" {% if question.correct=='C' %}checked{% endif %} disabled>
+                                    <label class="form-check-label w-100" for="previewC">
+                                        <span class="badge bg-primary me-2">C</span>
+                                        <span id="previewChoiceC">{{ question.choice_c }}</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="list-group-item">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="previewAnswer" id="previewD"
+                                        value="D" {% if question.correct=='D' %}checked{% endif %} disabled>
+                                    <label class="form-check-label w-100" for="previewD">
+                                        <span class="badge bg-primary me-2">D</span>
+                                        <span id="previewChoiceD">{{ question.choice_d }}</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-success mt-3">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <span>Correct answer: <strong>{{ question.correct }}</strong></span>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .icon-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    .input-group-text {
+        transition: var(--transition);
+    }
+
+    .input-group:focus-within .input-group-text {
+        background-color: var(--primary-light);
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.15);
+        border-color: var(--primary);
+    }
+
+    .answer-option {
+        padding: 1rem;
+        border-radius: var(--border-radius);
+        background-color: var(--gray-100);
+        transition: var(--transition);
+    }
+
+    .answer-option:hover {
+        background-color: var(--gray-200);
+    }
+
+    .list-group-item {
+        transition: var(--transition);
+    }
+
+    .list-group-item:hover {
+        background-color: var(--primary-light);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Preview functionality
+        const previewBtn = document.getElementById('previewBtn');
+        const previewModal = new bootstrap.Modal(document.getElementById('previewModal'));
+
+        previewBtn.addEventListener('click', function () {
+            // Update preview with current form values
+            document.getElementById('previewQuestion').textContent =
+                document.getElementById('text').value || 'Question text will appear here';
+
+            document.getElementById('previewChoiceA').textContent =
+                document.getElementById('choice_a').value || 'Option A text';
+
+            document.getElementById('previewChoiceB').textContent =
+                document.getElementById('choice_b').value || 'Option B text';
+
+            document.getElementById('previewChoiceC').textContent =
+                document.getElementById('choice_c').value || 'Option C text';
+
+            document.getElementById('previewChoiceD').textContent =
+                document.getElementById('choice_d').value || 'Option D text';
+
+            // Check the correct radio button based on selection
+            const correctAnswer = document.getElementById('correct').value;
+            document.querySelectorAll('input[name="previewAnswer"]').forEach(radio => {
+                radio.checked = (radio.value === correctAnswer);
+            });
+
+            // Update correct answer text
+            document.querySelector('.alert strong').textContent = correctAnswer;
+
+            // Show modal
+            previewModal.show();
+        });
+
+        // Add animation to form elements
+        const formElements = document.querySelectorAll('.form-control, .btn');
+        formElements.forEach((element, index) => {
+            element.style.animationDelay = `${index * 0.05}s`;
+        });
+
+        // Highlight the correct answer when the select changes
+        document.getElementById('correct').addEventListener('change', function () {
+            // Remove all correct badges
+            document.querySelectorAll('.answer-option .badge.bg-success').forEach(badge => {
+                badge.remove();
+            });
+
+            // Add correct badge to the selected option
+            const selectedOption = this.value;
+            const optionElement = document.querySelector(`.answer-option:nth-child(${selectedOption.charCodeAt(0) - 64})`);
+            if (optionElement) {
+                const label = optionElement.querySelector('label');
+                label.insertAdjacentHTML('afterend',
+                    '<span class="badge bg-success ms-2"><i class="fas fa-check me-1"></i>Correct</span>');
+            }
+        });
+    });
+</script>
+{% endblock %}

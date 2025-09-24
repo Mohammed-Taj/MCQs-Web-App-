@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-5 col-md-7">
+        <div class="card shadow-lg border-0 rounded-lg mt-5 fade-in">
+            <div class="card-header py-4"
+                style="background: linear-gradient(to right, var(--primary), var(--secondary));">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h3 class="m-0 font-weight-bold text-white"><i class="fas fa-sign-in-alt me-2"></i>Account Login
+                    </h3>
+                    <div class="icon-circle bg-white">
+                        <i class="fas fa-user text-primary"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-5">
+                <form method="POST" action="{{ url_for('login') }}">
+                    <div class="mb-4">
+                        <label for="username" class="form-label fw-bold text-dark mb-2">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0">
+                                <i class="fas fa-user text-primary"></i>
+                            </span>
+                            <input type="text" class="form-control ps-3 border-start-0" id="username" name="username"
+                                placeholder="Enter your username" required>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label for="password" class="form-label fw-bold text-dark mb-0">Password</label>
+                            <a href="#" class="text-primary small text-decoration-none">Forgot Password?</a>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0">
+                                <i class="fas fa-lock text-primary"></i>
+                            </span>
+                            <input type="password" class="form-control ps-3 border-start-0" id="password"
+                                name="password" placeholder="Enter your password" required>
+                            <button class="btn btn-outline-secondary toggle-password" type="button">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" id="rememberMe">
+                        <label class="form-check-label text-dark" for="rememberMe">
+                            Remember me
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold fs-5">
+                        <i class="fas fa-sign-in-alt me-2"></i>Login to Your Account
+                    </button>
+                </form>
+
+                <div class="position-relative my-4">
+                    <hr class="border-gray-300">
+                    <span class="position-absolute top-50 start-50 translate-middle px-3 bg-white text-dark">Or</span>
+                </div>
+
+                <div class="text-center">
+                    <p class="mb-3">Don't have an account?</p>
+                    <a href="{{ url_for('register') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-user-plus me-2"></i>Create New Account
+                    </a>
+                </div>
+            </div>
+            <div class="card-footer text-center py-3">
+                <p class="mb-0 small text-muted">By logging in, you agree to our <a href="#"
+                        class="text-decoration-none">Terms of Service</a> and <a href="#"
+                        class="text-decoration-none">Privacy Policy</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .icon-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    .toggle-password {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+
+    .input-group-text {
+        transition: var(--transition);
+    }
+
+    .input-group:focus-within .input-group-text {
+        background-color: var(--primary-light);
+    }
+
+    .form-control:focus {
+        box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.15);
+        border-color: var(--primary);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Toggle password visibility
+        const togglePassword = document.querySelector('.toggle-password');
+        const password = document.querySelector('#password');
+
+        if (togglePassword) {
+            togglePassword.addEventListener('click', function () {
+                const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                password.setAttribute('type', type);
+
+                // Toggle eye icon
+                const icon = this.querySelector('i');
+                icon.classList.toggle('fa-eye');
+                icon.classList.toggle('fa-eye-slash');
+            });
+        }
+
+        // Add animation to form elements
+        const formElements = document.querySelectorAll('.form-control, .btn');
+        formElements.forEach((element, index) => {
+            element.style.animationDelay = `${index * 0.05}s`;
+        });
+    });
+</script>
+{% endblock %}

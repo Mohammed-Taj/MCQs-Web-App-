@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-5">
+    <div>
+        <h2 class="fw-bold text-dark mb-1">My Quiz Results</h2>
+        <p class="text-muted">Track your performance and progress over time</p>
+    </div>
+    <div class="dropdown">
+        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="resultsActions"
+            data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-download me-2"></i>Export
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="resultsActions">
+            <li><a class="dropdown-item" href="#"><i class="fas fa-file-csv me-2"></i>CSV</a></li>
+            <li><a class="dropdown-item" href="#"><i class="fas fa-file-pdf me-2"></i>PDF</a></li>
+            <li><a class="dropdown-item" href="#"><i class="fas fa-print me-2"></i>Print</a></li>
+        </ul>
+    </div>
+</div>
+
+<!-- Performance Summary -->
+<div class="row mb-5">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100 py-3 dashboard-stat stat-attempts">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <div class="text-xs fw-bold text-primary text-uppercase mb-1">Total Attempts</div>
+                        <div class="h5 mb-0 fw-bold text-gray-800">{{ results|length }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-check-circle fa-2x text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100 py-3 dashboard-stat stat-average">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <div class="text-xs fw-bold text-success text-uppercase mb-1">Average Score</div>
+                        <div class="h5 mb-0 fw-bold text-gray-800">
+                            {% if results %}
+                            {{ (results|map(attribute='score')|sum / results|map(attribute='total')|sum * 100)|round(1)
+                            }}%
+                            {% else %}0%{% endif %}
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-chart-line fa-2x text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100 py-3 dashboard-stat stat-best">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <div class="text-xs fw-bold text-info text-uppercase mb-1">Best Score</div>
+                        <div class="h5 mb-0 fw-bold text-gray-800">
+                            {% if results %}
+                            {{ (results|map(attribute='score')|max / results|map(attribute='total')|max * 100)|round(1)
+                            }}%
+                            {% else %}0%{% endif %}
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-trophy fa-2x text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100 py-3 dashboard-stat stat-quizzes">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <div class="text-xs fw-bold text-warning text-uppercase mb-1">Unique Quizzes</div>
+                        <div class="h5 mb-0 fw-bold text-gray-800">
+                            {% if results %}
+                            {{ unique_quizzes }}
+                            {% else %}0{% endif %}
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-file-alt fa-2x text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Results Table -->
+<div class="card border-0 shadow-lg mb-4">
+    <div class="card-header py-4" style="background: linear-gradient(to right, var(--primary), var(--secondary));">
+        <div class="d-flex align-items-center">
+            <div class="icon-circle bg-white me-3">
+                <i class="fas fa-history text-primary"></i>
+            </div>
+            <h4 class="m-0 font-weight-bold text-white">Quiz Attempt History</h4>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        {% if results %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 results-table">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Quiz</th>
+                        <th>Date & Time</th>
+                        <th>Score</th>
+                        <th>Percentage</th>
+                        <th class="text-center">Performance</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                    {% set percentage = (result.score / result.total * 100) | round(1) %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="fw-bold text-dark">{{ result.quiz.title }}</div>
+                            <small class="text-muted">{{ result.quiz.description[:50] }}{% if
+                                result.quiz.description|length > 50 %}...{% endif %}</small>
+                        </td>
+                        <td>
+                            <div class="fw-bold">{{ result.timestamp.strftime('%b %d, %Y') if result.timestamp else
+                                'N/A' }}</div>
+                            <small class="text-muted">{{ result.timestamp.strftime('%H:%M') if result.timestamp else ''
+                                }}</small>
+                        </td>
+                        <td>
+                            <span class="fw-bold">{{ result.score }}/{{ result.total }}</span>
+                        </td>
+                        <td>
+                            <span
+                                class="badge bg-{% if percentage >= 80 %}success{% elif percentage >= 60 %}warning{% else %}danger{% endif %} rounded-pill py-2 px-3">
+                                {{ percentage }}%
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <div class="progress" style="height: 6px; width: 80px; margin: 0 auto;">
+                                <div class="progress-bar bg-{% if percentage >= 80 %}success{% elif percentage >= 60 %}warning{% else %}danger{% endif %}"
+                                    role="progressbar" style="width: {{ percentage }}%;"
+                                    aria-valuenow="{{ percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </td>
+                        <td class="text-end pe-4">
+                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip"
+                                title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="Retake Quiz">
+                                <i class="fas fa-redo"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-clipboard-list fa-4x text-muted mb-4"></i>
+            <h5 class="text-dark mb-2">No quiz results yet</h5>
+            <p class="text-muted mb-4">Your quiz attempts will appear here once you complete some quizzes.</p>
+            <a href="{{ url_for('student_dashboard') }}" class="btn btn-primary px-4">
+                <i class="fas fa-play-circle me-2"></i>Take a Quiz
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    {% if results %}
+    <div class="card-footer bg-white py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="text-muted small">Showing {{ results|length }} results</div>
+            <nav aria-label="Results pagination">
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Performance Chart (Placeholder) -->
+<div class="card border-0 shadow-lg">
+    <div class="card-header py-4 bg-white">
+        <h5 class="m-0 fw-bold text-dark"><i class="fas fa-chart-line me-2 text-primary"></i>Performance Trend</h5>
+    </div>
+    <div class="card-body">
+        <div class="text-center py-5 bg-light rounded-3">
+            <i class="fas fa-chart-bar fa-3x text-muted mb-3"></i>
+            <h6 class="text-dark mb-2">Performance analytics coming soon</h6>
+            <p class="text-muted mb-0">Visual charts showing your progress over time will be available here.</p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .icon-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    .dashboard-stat {
+        border-left: 4px solid transparent;
+        transition: var(--transition);
+    }
+
+    .stat-attempts {
+        border-left-color: var(--primary) !important;
+    }
+
+    .stat-average {
+        border-left-color: var(--success) !important;
+    }
+
+    .stat-best {
+        border-left-color: var(--info) !important;
+    }
+
+    .stat-quizzes {
+        border-left-color: var(--warning) !important;
+    }
+
+    .dashboard-stat:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg) !important;
+    }
+
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+    }
+
+    .badge {
+        font-weight: 500;
+    }
+
+    .card {
+        border-radius: var(--border-radius);
+    }
+
+    .card-header {
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .progress {
+        border-radius: 10px;
+    }
+
+    .results-table tbody tr {
+        transition: var(--transition);
+    }
+
+    .results-table tbody tr:hover {
+        background-color: var(--primary-light);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        // Add animation to cards
+        const cards = document.querySelectorAll('.card');
+        cards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+        });
+
+        // Add animation to stats
+        const stats = document.querySelectorAll('.dashboard-stat');
+        stats.forEach((stat, index) => {
+            stat.style.animationDelay = `${index * 0.15}s`;
+        });
+    });
+</script>
+{% endblock %}

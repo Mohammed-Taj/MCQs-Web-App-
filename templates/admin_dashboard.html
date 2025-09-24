@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-dark">Admin Dashboard</h2>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('analysis') }}" class="btn btn-outline-primary">
+            <i class="fas fa-chart-bar me-2"></i>View Analytics
+        </a>
+        <a href="{{ url_for('add_quiz_route') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Create Quiz
+        </a>
+    </div>
+</div>
+
+<!-- Dashboard Stats -->
+<div class="row mb-5">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100 py-3 dashboard-stat stat-admin">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <div class="text-xs fw-bold text-primary text-uppercase mb-1">Total Users</div>
+                        <div class="h5 mb-0 fw-bold text-gray-800">{{ total_users }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-users fa-2x text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100 py-3 dashboard-stat stat-student">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <div class="text-xs fw-bold text-success text-uppercase mb-1">Active Users</div>
+                        <div class="h5 mb-0 fw-bold text-gray-800">{{ total_active }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-user-check fa-2x text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100 py-3 dashboard-stat stat-quiz">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <div class="text-xs fw-bold text-info text-uppercase mb-1">Total Quizzes</div>
+                        <div class="h5 mb-0 fw-bold text-gray-800">{{ total_quizzes }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-file-alt fa-2x text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100 py-3 dashboard-stat stat-question">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <div class="text-xs fw-bold text-warning text-uppercase mb-1">Total Questions</div>
+                        <div class="h5 mb-0 fw-bold text-gray-800">{{ total_questions }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-question-circle fa-2x text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Users Management -->
+    <div class="col-lg-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="m-0 fw-bold text-primary"><i class="fas fa-user-cog me-2"></i>User Management</h5>
+                <span class="badge bg-primary rounded-pill">{{ users|length }} users</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">Username</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th class="text-end pe-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td class="ps-4 fw-bold">{{ user.username }}</td>
+                                <td>
+                                    <span
+                                        class="badge {% if user.role == 'admin' %}bg-danger{% else %}bg-info{% endif %}">
+                                        {{ user.role }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span
+                                        class="badge {% if user.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                                        {{ 'Active' if user.is_active else 'Inactive' }}
+                                    </span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <form action="{{ url_for('update_user_route', user_id=user.id) }}" method="POST"
+                                        class="d-inline">
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button"
+                                                id="userActions{{ user.id }}" data-bs-toggle="dropdown"
+                                                aria-expanded="false">
+                                                Actions
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end"
+                                                aria-labelledby="userActions{{ user.id }}">
+                                                <li class="dropdown-item-text small px-3">Change Role:</li>
+                                                <li>
+                                                    <div class="px-3 py-1">
+                                                        <select name="role" class="form-select form-select-sm">
+                                                            <option value="admin" {% if user.role=='admin' %}selected{%
+                                                                endif %}>Admin</option>
+                                                            <option value="student" {% if user.role=='student'
+                                                                %}selected{% endif %}>Student</option>
+                                                        </select>
+                                                    </div>
+                                                </li>
+                                                <li class="dropdown-item-text small px-3 mt-2">Change Status:</li>
+                                                <li>
+                                                    <div class="px-3 py-1">
+                                                        <select name="is_active" class="form-select form-select-sm">
+                                                            <option value="1" {% if user.is_active %}selected{% endif
+                                                                %}>Active</option>
+                                                            <option value="0" {% if not user.is_active %}selected{%
+                                                                endif %}>Inactive</option>
+                                                        </select>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <hr class="dropdown-divider">
+                                                </li>
+                                                <li>
+                                                    <button type="submit" class="dropdown-item text-primary">
+                                                        <i class="fas fa-save me-2"></i>Update User
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted">
+                                    <i class="fas fa-users fa-2x mb-2 d-block"></i>
+                                    No users found.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quizzes Management -->
+    <div class="col-lg-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="m-0 fw-bold text-primary"><i class="fas fa-file-alt me-2"></i>Quiz Management</h5>
+                <a href="{{ url_for('add_quiz_route') }}" class="btn btn-sm btn-success">
+                    <i class="fas fa-plus me-1"></i>New Quiz
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">Title</th>
+                                <th>Questions</th>
+                                <th class="text-end pe-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for quiz in quizzes %}
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold text-dark">{{ quiz.title }}</div>
+                                    <div class="small text-muted">{{ quiz.description[:40] }}{% if
+                                        quiz.description|length > 40 %}...{% endif %}</div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info rounded-pill">{{ quiz.questions|length }}</span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ url_for('update_quiz_route', quiz_id=quiz.id) }}"
+                                            class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip"
+                                            title="Edit Quiz">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{{ url_for('add_question_route', quiz_id=quiz.id) }}"
+                                            class="btn btn-sm btn-outline-success" data-bs-toggle="tooltip"
+                                            title="Add Question">
+                                            <i class="fas fa-plus-circle"></i>
+                                        </a>
+                                        <form action="{{ url_for('delete_quiz_route', quiz_id=quiz.id) }}" method="POST"
+                                            class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                onclick="return confirm('Are you sure you want to delete this quiz?')"
+                                                data-bs-toggle="tooltip" title="Delete Quiz">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center py-4 text-muted">
+                                    <i class="fas fa-file-alt fa-2x mb-2 d-block"></i>
+                                    No quizzes found. <a href="{{ url_for('add_quiz_route') }}">Create your first
+                                        quiz</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .dashboard-stat {
+        border-left: 4px solid transparent;
+        transition: var(--transition);
+    }
+
+    .stat-admin {
+        border-left-color: var(--primary) !important;
+    }
+
+    .stat-student {
+        border-left-color: var(--success) !important;
+    }
+
+    .stat-quiz {
+        border-left-color: var(--info) !important;
+    }
+
+    .stat-question {
+        border-left-color: var(--warning) !important;
+    }
+
+    .dashboard-stat:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg) !important;
+    }
+
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+    }
+
+    .badge {
+        font-weight: 500;
+    }
+
+    .card {
+        border-radius: var(--border-radius);
+    }
+
+    .card-header {
+        border-bottom: 1px solid var(--gray-200);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        // Add animation to cards
+        const cards = document.querySelectorAll('.card');
+        cards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+        });
+    });
+</script>
+{% endblock %}

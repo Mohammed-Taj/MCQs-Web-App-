@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-5">
+    <div>
+        <h2 class="fw-bold text-dark mb-1">Welcome, {{ session['username'] }}!</h2>
+        <p class="text-muted">Ready to test your knowledge? Explore available quizzes below.</p>
+    </div>
+    <div class="dropdown">
+        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="dashboardActions"
+            data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-cog me-2"></i>Actions
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dashboardActions">
+            <li><a class="dropdown-item" href="{{ url_for('student_results') }}"><i
+                        class="fas fa-chart-line me-2"></i>View Results</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('update_profile') }}"><i
+                        class="fas fa-user-edit me-2"></i>Update Profile</a></li>
+            <li>
+                <hr class="dropdown-divider">
+            </li>
+            <li><a class="dropdown-item" href="#"><i class="fas fa-question-circle me-2"></i>Help Center</a></li>
+        </ul>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row mb-5">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100 py-3 dashboard-stat stat-student">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <div class="text-xs fw-bold text-primary text-uppercase mb-1">User Role</div>
+                        <div class="h5 mb-0 fw-bold text-gray-800">Student</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-user-graduate fa-2x text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100 py-3 dashboard-stat stat-quiz">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <div class="text-xs fw-bold text-success text-uppercase mb-1">Available Quizzes</div>
+                        <div class="h5 mb-0 fw-bold text-gray-800">{{ quizzes|length }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-clipboard-list fa-2x text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100 py-3 dashboard-stat stat-attempt">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <div class="text-xs fw-bold text-info text-uppercase mb-1">Quiz Attempts</div>
+                        <div class="h5 mb-0 fw-bold text-gray-800">{{ total_attempts }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-check-circle fa-2x text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100 py-3 dashboard-stat stat-avg">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <div class="text-xs fw-bold text-warning text-uppercase mb-1">Average Score</div>
+                        <div class="h5 mb-0 fw-bold text-gray-800">{{ overall_avg }}%</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-chart-line fa-2x text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Available Quizzes -->
+<div class="card border-0 shadow-lg mb-4">
+    <div class="card-header py-4" style="background: linear-gradient(to right, var(--primary), var(--secondary));">
+        <div class="d-flex align-items-center">
+            <div class="icon-circle bg-white me-3">
+                <i class="fas fa-clipboard-list text-primary"></i>
+            </div>
+            <h4 class="m-0 font-weight-bold text-white">Available Quizzes</h4>
+        </div>
+    </div>
+    <div class="card-body p-4">
+        {% if quizzes %}
+        <div class="row">
+            {% for quiz in quizzes %}
+            <div class="col-xl-4 col-md-6 mb-4">
+                <div class="card quiz-card h-100 border-0 shadow-sm hover-lift">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="card-title fw-bold text-dark mb-0">{{ quiz.title }}</h5>
+                        <span class="badge bg-success rounded-pill">
+                            <i class="fas fa-history me-1"></i>
+                            Attempts: {{ attempts_per_quiz.get(quiz.id, 0) }}
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text text-muted">{{ quiz.description[:100] }}{% if quiz.description|length > 100
+                            %}...{% endif %}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge bg-primary rounded-pill">
+                                <i class="fas fa-question me-1"></i>{{ quiz.questions|length }} questions
+                            </span>
+                            {% if quiz.estimated_time %}
+                            <span class="badge bg-info rounded-pill">
+                                <i class="fas fa-clock me-1"></i>{{ quiz.estimated_time }} min
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white py-3">
+                        <a href="{{ url_for('take_quiz', quiz_id=quiz.id) }}" class="btn btn-primary w-100 py-2">
+                            <i class="fas fa-play-circle me-2"></i>
+                            {% if attempts_per_quiz.get(quiz.id, 0) > 0 %}
+                            Retake Quiz
+                            {% else %}
+                            Start Quiz
+                            {% endif %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-clipboard-list fa-4x text-muted mb-4"></i>
+            <h5 class="text-dark mb-2">No quizzes available</h5>
+            <p class="text-muted mb-4">Check back later for new quizzes or contact your instructor.</p>
+            <a href="#" class="btn btn-outline-primary">
+                <i class="fas fa-envelope me-2"></i>Request Quizzes
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+
+<!-- Recent Activity -->
+<!-- <div class="card border-0 shadow-lg">
+    <div class="card-header py-4 bg-white">
+        <h5 class="m-0 fw-bold text-dark"><i class="fas fa-history me-2 text-primary"></i>Recent Activity</h5>
+    </div>
+    <div class="card-body p-0">
+        {% if recent_attempts %}
+        <div class="list-group list-group-flush">
+            {% for attempt in recent_attempts %}
+            <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                <div class="d-flex align-items-center">
+                    <div class="icon-circle-sm bg-primary-light text-primary me-3">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0 text-dark">{{ attempt.quiz.title }}</h6>
+                        <small class="text-muted">Completed on {{ attempt.timestamp.strftime('%b %d, %Y at %H:%M')
+                            }}</small>
+                    </div>
+                </div>
+                <span
+                    class="badge {% if attempt.score >= 80 %}bg-success{% elif attempt.score >= 50 %}bg-warning{% else %}bg-danger{% endif %} rounded-pill">
+                    {{ attempt.score }}%
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="card-footer bg-white py-3 text-center">
+            <a href="{{ url_for('student_results') }}" class="btn btn-outline-primary btn-sm">
+                <i class="fas fa-eye me-2"></i>View All Results
+            </a>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-history fa-3x text-muted mb-3"></i>
+            <h6 class="text-dark mb-2">No recent activity</h6>
+            <p class="text-muted mb-0">Your quiz attempts will appear here.</p>
+        </div>
+        {% endif %}
+    </div>
+</div> -->
+
+<style>
+    .icon-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    .icon-circle-sm {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+    }
+
+    .dashboard-stat {
+        border-left: 4px solid transparent;
+        transition: var(--transition);
+    }
+
+    .stat-student {
+        border-left-color: var(--primary) !important;
+    }
+
+    .stat-quiz {
+        border-left-color: var(--success) !important;
+    }
+
+    .stat-attempt {
+        border-left-color: var(--info) !important;
+    }
+
+    .stat-avg {
+        border-left-color: var(--warning) !important;
+    }
+
+    .dashboard-stat:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg) !important;
+    }
+
+    .quiz-card {
+        transition: var(--transition);
+    }
+
+    .hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg) !important;
+    }
+
+    .bg-primary-light {
+        background-color: var(--primary-light) !important;
+    }
+
+    .list-group-item {
+        transition: var(--transition);
+        border-left: 3px solid transparent;
+    }
+
+    .list-group-item:hover {
+        background-color: var(--primary-light);
+        border-left-color: var(--primary);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Add animation to cards
+        const cards = document.querySelectorAll('.card');
+        cards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+        });
+
+        // Add animation to stats
+        const stats = document.querySelectorAll('.dashboard-stat');
+        stats.forEach((stat, index) => {
+            stat.style.animationDelay = `${index * 0.15}s`;
+        });
+    });
+</script>
+{% endblock %}

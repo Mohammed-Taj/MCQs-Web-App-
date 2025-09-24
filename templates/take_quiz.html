@@ -1,0 +1,303 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- Quiz Header -->
+        <div class="card border-0 shadow-lg mb-4">
+            <div class="card-header py-4"
+                style="background: linear-gradient(to right, var(--primary), var(--secondary));">
+                <div class="d-flex align-items-center">
+                    <div class="icon-circle bg-white me-3">
+                        <i class="fas fa-pencil-alt text-primary"></i>
+                    </div>
+                    <div>
+                        <h3 class="m-0 font-weight-bold text-white">{{ quiz.title }}</h3>
+                        <p class="m-0 text-white-50">Test your knowledge</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="card-text lead">{{ quiz.description }}</p>
+                <div class="d-flex gap-3">
+                    <span class="badge bg-primary rounded-pill px-3 py-2">
+                        <i class="fas fa-question me-1"></i>{{ quiz.questions|length }} questions
+                    </span>
+                    <span class="badge bg-info rounded-pill px-3 py-2">
+                        <i class="fas fa-clock me-1"></i>Estimated time: {{ (quiz.questions|length * 0.5)|round }}
+                        minutes
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="progress flex-grow-1 me-3" style="height: 8px;">
+                        <div class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0"
+                            aria-valuemin="0" aria-valuemax="100" id="quizProgress"></div>
+                    </div>
+                    <small class="text-muted" id="progressText">Question <span id="currentQuestion">1</span> of {{
+                        quiz.questions|length }}</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Questions -->
+        <form method="POST" id="quizForm">
+            {% for question in quiz.questions %}
+            <div class="question-card card border-0 shadow-sm mb-4" id="question-{{ loop.index }}" {% if loop.index !=1
+                %}style="display: none;" {% endif %}>
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 text-dark">
+                        <span class="badge bg-primary me-2">{{ loop.index }}</span>
+                        {{ question.text }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="options-container">
+                        <div class="form-check mb-3 option-item">
+                            <input class="form-check-input option-input" type="radio" name="{{ question.id }}"
+                                id="option_a_{{ question.id }}" value="a" required>
+                            <label class="form-check-label option-label w-100 py-3 px-4"
+                                for="option_a_{{ question.id }}">
+                                <span class="option-letter bg-primary">A</span>
+                                {{ question.choice_a }}
+                            </label>
+                        </div>
+
+                        <div class="form-check mb-3 option-item">
+                            <input class="form-check-input option-input" type="radio" name="{{ question.id }}"
+                                id="option_b_{{ question.id }}" value="b">
+                            <label class="form-check-label option-label w-100 py-3 px-4"
+                                for="option_b_{{ question.id }}">
+                                <span class="option-letter bg-primary">B</span>
+                                {{ question.choice_b }}
+                            </label>
+                        </div>
+
+                        <div class="form-check mb-3 option-item">
+                            <input class="form-check-input option-input" type="radio" name="{{ question.id }}"
+                                id="option_c_{{ question.id }}" value="c">
+                            <label class="form-check-label option-label w-100 py-3 px-4"
+                                for="option_c_{{ question.id }}">
+                                <span class="option-letter bg-primary">C</span>
+                                {{ question.choice_c }}
+                            </label>
+                        </div>
+
+                        <div class="form-check mb-3 option-item">
+                            <input class="form-check-input option-input" type="radio" name="{{ question.id }}"
+                                id="option_d_{{ question.id }}" value="d">
+                            <label class="form-check-label option-label w-100 py-3 px-4"
+                                for="option_d_{{ question.id }}">
+                                <span class="option-letter bg-primary">D</span>
+                                {{ question.choice_d }}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- Navigation Buttons -->
+            <div class="d-flex justify-content-between mt-4">
+                <button type="button" class="btn btn-outline-primary px-4 py-2" id="prevBtn" style="display: none;">
+                    <i class="fas fa-arrow-left me-2"></i>Previous
+                </button>
+
+                <button type="button" class="btn btn-primary px-4 py-2" id="nextBtn">
+                    Next Question<i class="fas fa-arrow-right ms-2"></i>
+                </button>
+
+                <button type="submit" class="btn btn-success px-4 py-2" id="submitBtn" style="display: none;">
+                    <i class="fas fa-paper-plane me-2"></i>Submit Answers
+                </button>
+            </div>
+        </form>
+
+        <!-- Time Remaining Indicator -->
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-body py-3 text-center">
+                <div class="d-flex align-items-center justify-content-center">
+                    <i class="fas fa-clock text-warning me-2"></i>
+                    <span class="text-muted">Time spent: </span>
+                    <span class="fw-bold text-dark ms-1" id="timer">00:00</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .icon-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .question-card {
+        transition: var(--transition);
+    }
+
+    .option-item {
+        transition: var(--transition);
+    }
+
+    .option-label {
+        border: 2px solid var(--gray-300);
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+    }
+
+    .option-label:hover {
+        border-color: var(--primary);
+        background-color: var(--primary-light);
+    }
+
+    .option-input:checked+.option-label {
+        border-color: var(--primary);
+        background-color: var(--primary-light);
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+
+    .option-letter {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        margin-right: 15px;
+        flex-shrink: 0;
+    }
+
+    .progress-bar {
+        transition: width 0.3s ease;
+    }
+
+    #timer {
+        font-family: 'Courier New', monospace;
+        font-size: 1.1rem;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const questions = document.querySelectorAll('.question-card');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        const progressBar = document.getElementById('quizProgress');
+        const currentQuestionElement = document.getElementById('currentQuestion');
+        const progressText = document.getElementById('progressText');
+        const timerElement = document.getElementById('timer');
+
+        let currentQuestion = 1;
+        let startTime = new Date();
+        let timerInterval;
+
+        // Initialize timer
+        function startTimer() {
+            timerInterval = setInterval(function () {
+                const now = new Date();
+                const diff = Math.floor((now - startTime) / 1000);
+                const minutes = Math.floor(diff / 60).toString().padStart(2, '0');
+                const seconds = (diff % 60).toString().padStart(2, '0');
+                timerElement.textContent = `${minutes}:${seconds}`;
+            }, 1000);
+        }
+
+        // Update progress bar
+        function updateProgress() {
+            const progress = ((currentQuestion - 1) / questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            currentQuestionElement.textContent = currentQuestion;
+        }
+
+        // Show specific question
+        function showQuestion(index) {
+            questions.forEach((question, i) => {
+                question.style.display = (i + 1 === index) ? 'block' : 'none';
+            });
+
+            // Update button visibility
+            prevBtn.style.display = (index > 1) ? 'block' : 'none';
+            nextBtn.style.display = (index < questions.length) ? 'block' : 'none';
+            submitBtn.style.display = (index === questions.length) ? 'block' : 'none';
+
+            updateProgress();
+        }
+
+        // Navigation handlers
+        nextBtn.addEventListener('click', function () {
+            // Validate current question has an answer
+            const currentQuestionInputs = questions[currentQuestion - 1].querySelectorAll('input[type="radio"]');
+            const isAnswered = Array.from(currentQuestionInputs).some(input => input.checked);
+
+            if (!isAnswered) {
+                alert('Please select an answer before proceeding to the next question.');
+                return;
+            }
+
+            if (currentQuestion < questions.length) {
+                currentQuestion++;
+                showQuestion(currentQuestion);
+            }
+        });
+
+        prevBtn.addEventListener('click', function () {
+            if (currentQuestion > 1) {
+                currentQuestion--;
+                showQuestion(currentQuestion);
+            }
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'ArrowRight') {
+                nextBtn.click();
+            } else if (e.key === 'ArrowLeft') {
+                prevBtn.click();
+            }
+        });
+
+        // Form submission confirmation
+        document.getElementById('quizForm').addEventListener('submit', function (e) {
+            const unanswered = Array.from(questions).some((question, index) => {
+                const inputs = question.querySelectorAll('input[type="radio"]');
+                return Array.from(inputs).every(input => !input.checked);
+            });
+
+            if (unanswered) {
+                if (!confirm('You have unanswered questions. Are you sure you want to submit?')) {
+                    e.preventDefault();
+                }
+            }
+
+            // Stop timer on submit
+            clearInterval(timerInterval);
+        });
+
+        // Start timer and initialize
+        startTimer();
+        showQuestion(1);
+
+        // Add animation to questions
+        questions.forEach((question, index) => {
+            question.style.animationDelay = `${index * 0.1}s`;
+        });
+    });
+</script>
+{% endblock %}

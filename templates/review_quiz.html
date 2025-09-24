@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="card border-0 shadow-lg mb-4">
+        <div class="card-header py-4" style="background: linear-gradient(to right, var(--primary), var(--secondary));">
+            <div class="d-flex align-items-center">
+                <div class="icon-circle bg-white me-3">
+                    <i class="fas fa-clipboard-check text-primary"></i>
+                </div>
+                <div>
+                    <h2 class="m-0 font-weight-bold text-white">{{ quiz.title }} - Review</h2>
+                    <p class="m-0 text-white-50">See how you performed on this quiz</p>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="d-flex align-items-center">
+                        <div class="score-display me-4">
+                            <h3 class="mb-1 text-dark">{{ score }}/{{ total }} Correct</h3>
+                            <p class="text-muted mb-0">{{ (score/total*100)|round(1) }}% Overall Score</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 d-flex align-items-center justify-content-end">
+                    <a href="{{ url_for('student_dashboard') }}" class="btn btn-primary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Questions Review -->
+    <div class="card border-0 shadow-lg">
+        <div class="card-header py-4 bg-white">
+            <h4 class="m-0 fw-bold text-dark"><i class="fas fa-question-circle me-2 text-primary"></i>Question Review
+            </h4>
+        </div>
+        <div class="card-body p-0">
+            {% for question in quiz.questions %}
+            <div class="question-review p-4 border-bottom">
+                <div class="d-flex align-items-start mb-3">
+                    <span
+                        class="badge {% if student_answers[question.id]|upper == question.correct|upper %}bg-success{% else %}bg-danger{% endif %} me-3 question-number">
+                        Q{{ loop.index }}
+                    </span>
+                    <h5 class="mb-0 flex-grow-1 text-dark">{{ question.text }}</h5>
+                </div>
+
+                <div class="options-container">
+                    <!-- Display choice A -->
+                    <div class="option-item mb-2 p-3 rounded 
+                        {% if question.choice_a|upper == question.correct|upper %}correct-answer{% endif %}
+                        {% if student_answers[question.id] == question.choice_a %}student-answer{% endif %}">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" {% if
+                                student_answers[question.id]==question.choice_a %}checked{% endif %} disabled>
+                            <label class="form-check-label w-100">
+                                <span class="option-letter 
+                                    {% if question.choice_a|upper == question.correct|upper %}bg-success
+                                    {% elif student_answers[question.id] == question.choice_a %}bg-danger
+                                    {% else %}bg-secondary{% endif %}">
+                                    A
+                                </span>
+                                {{ question.choice_a }}
+                                {% if student_answers[question.id] == question.choice_a %}
+                                <span
+                                    class="badge bg-{% if question.choice_a|upper == question.correct|upper %}success{% else %}danger{% endif %} ms-2">
+                                    <i
+                                        class="fas {% if question.choice_a|upper == question.correct|upper %}fa-check{% else %}fa-times{% endif %} me-1"></i>
+                                    Your Answer
+                                </span>
+                                {% endif %}
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Display choice B -->
+                    <div class="option-item mb-2 p-3 rounded 
+                        {% if question.choice_b|upper == question.correct|upper %}correct-answer{% endif %}
+                        {% if student_answers[question.id] == question.choice_b %}student-answer{% endif %}">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" {% if
+                                student_answers[question.id]==question.choice_b %}checked{% endif %} disabled>
+                            <label class="form-check-label w-100">
+                                <span class="option-letter 
+                                    {% if question.choice_b|upper == question.correct|upper %}bg-success
+                                    {% elif student_answers[question.id] == question.choice_b %}bg-danger
+                                    {% else %}bg-secondary{% endif %}">
+                                    B
+                                </span>
+                                {{ question.choice_b }}
+                                {% if student_answers[question.id] == question.choice_b %}
+                                <span
+                                    class="badge bg-{% if question.choice_b|upper == question.correct|upper %}success{% else %}danger{% endif %} ms-2">
+                                    <i
+                                        class="fas {% if question.choice_b|upper == question.correct|upper %}fa-check{% else %}fa-times{% endif %} me-1"></i>
+                                    Your Answer
+                                </span>
+                                {% endif %}
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Display choice C -->
+                    <div class="option-item mb-2 p-3 rounded 
+                        {% if question.choice_c|upper == question.correct|upper %}correct-answer{% endif %}
+                        {% if student_answers[question.id] == question.choice_c %}student-answer{% endif %}">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" {% if
+                                student_answers[question.id]==question.choice_c %}checked{% endif %} disabled>
+                            <label class="form-check-label w-100">
+                                <span class="option-letter 
+                                    {% if question.choice_c|upper == question.correct|upper %}bg-success
+                                    {% elif student_answers[question.id] == question.choice_c %}bg-danger
+                                    {% else %}bg-secondary{% endif %}">
+                                    C
+                                </span>
+                                {{ question.choice_c }}
+                                {% if student_answers[question.id] == question.choice_c %}
+                                <span
+                                    class="badge bg-{% if question.choice_c|upper == question.correct|upper %}success{% else %}danger{% endif %} ms-2">
+                                    <i
+                                        class="fas {% if question.choice_c|upper == question.correct|upper %}fa-check{% else %}fa-times{% endif %} me-1"></i>
+                                    Your Answer
+                                </span>
+                                {% endif %}
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Display choice D -->
+                    <div class="option-item mb-2 p-3 rounded 
+                        {% if question.choice_d|upper == question.correct|upper %}correct-answer{% endif %}
+                        {% if student_answers[question.id] == question.choice_d %}student-answer{% endif %}">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" {% if
+                                student_answers[question.id]==question.choice_d %}checked{% endif %} disabled>
+                            <label class="form-check-label w-100">
+                                <span class="option-letter 
+                                    {% if question.choice_d|upper == question.correct|upper %}bg-success
+                                    {% elif student_answers[question.id] == question.choice_d %}bg-danger
+                                    {% else %}bg-secondary{% endif %}">
+                                    D
+                                </span>
+                                {{ question.choice_d }}
+                                {% if student_answers[question.id] == question.choice_d %}
+                                <span
+                                    class="badge bg-{% if question.choice_d|upper == question.correct|upper %}success{% else %}danger{% endif %} ms-2">
+                                    <i
+                                        class="fas {% if question.choice_d|upper == question.correct|upper %}fa-check{% else %}fa-times{% endif %} me-1"></i>
+                                    Your Answer
+                                </span>
+                                {% endif %}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Correct Answer Display -->
+                <div
+                    class="correct-answer-box mt-3 p-3 bg-success bg-opacity-10 rounded border-start border-4 border-success">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-check-circle text-success me-2 fs-5"></i>
+                        <div>
+                            <strong class="text-success">Correct Answer:</strong>
+                            <span class="ms-2 fw-medium">{{ question.correct }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                {% if student_answers[question.id]|upper != question.correct|upper %}
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    <strong>Explanation:</strong>
+                    {% if student_answers[question.id] %}You selected "{{ student_answers[question.id] }}" but the
+                    correct answer is "{{ question.correct }}".{% else %}You didn't answer this question. The correct
+                    answer is "{{ question.correct }}".{% endif %}
+                </div>
+                {% else %}
+                <div class=" alert-success mt-3">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong>Well done!</strong> You answered this question correctly.
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Action Button -->
+    <div class="d-flex justify-content-center mt-4">
+        <a href="{{ url_for('student_dashboard') }}" class="btn btn-primary px-4">
+            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<style>
+    .icon-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .question-number {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        border-radius: 50%;
+    }
+
+    .option-item {
+        transition: var(--transition);
+        border: 2px solid transparent;
+    }
+
+    .option-item.correct-answer {
+        background-color: rgba(40, 167, 69, 0.1);
+        border-color: rgba(40, 167, 69, 0.3);
+    }
+
+    .option-item.student-answer:not(.correct-answer) {
+        background-color: rgba(220, 53, 69, 0.1);
+        border-color: rgba(220, 53, 69, 0.3);
+    }
+
+    .option-letter {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        margin-right: 15px;
+        flex-shrink: 0;
+    }
+
+    .question-review {
+        transition: var(--transition);
+    }
+
+    .question-review:hover {
+        background-color: var(--gray-100);
+    }
+
+    .score-display {
+        padding: 1rem;
+        background-color: var(--primary-light);
+        border-radius: var(--border-radius);
+        border-left: 4px solid var(--primary);
+    }
+
+    .correct-answer-box {
+        border-left: 4px solid var(--success);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Add animation to questions
+        const questions = document.querySelectorAll('.question-review');
+        questions.forEach((question, index) => {
+            question.style.animationDelay = `${index * 0.1}s`;
+        });
+    });
+</script>
+{% endblock %}
